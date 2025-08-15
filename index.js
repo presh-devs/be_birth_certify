@@ -102,22 +102,22 @@ app.post('/storacha/upload', async (req, res) => {
       tasks: [['store/add', SPACE_DID, { link: { '/': shardCid }, size }]],
     };
     const storeResp = await axios.post(STORACHA_BRIDGE_URL, tasksStore, { headers: bridgeHeaders() });
-    
+
     console.log('[store/add] response:', JSON.stringify(storeResp.data, null, 2));
 
-// after storeResp
-const storeTask = (storeResp.data?.results || [])[0];
-const putUrl = storeTask?.out?.ok?.url;
-const putHeaders = storeTask?.out?.ok?.headers || {};
+    // after storeResp
+    const storeTask = (storeResp.data?.results || [])[0];
+    const putUrl = storeTask?.out?.ok?.url;
+    const putHeaders = storeTask?.out?.ok?.headers || {};
 
-if (!putUrl) {
-  console.error('[store/add] no putUrl; full response:', JSON.stringify(storeResp.data, null, 2));
-  return res.status(502).json({
-    ok: false,
-    error: 'Bridge did not return a PUT URL',
-    bridge: storeResp.data   // <— include raw bridge response so we can read the reason
-  });
-}
+    if (!putUrl) {
+      console.error('[store/add] no putUrl; full response:', JSON.stringify(storeResp.data, null, 2));
+      return res.status(502).json({
+        ok: false,
+        error: 'Bridge did not return a PUT URL',
+        bridge: storeResp.data   // <— include raw bridge response so we can read the reason
+      });
+    }
 
     if (!putUrl) {
       return res
@@ -150,4 +150,15 @@ if (!putUrl) {
 
 app.listen(PORT, () => {
   console.log(`Storacha bridge backend listening on :${PORT}`);
+});
+
+
+app.get('/storacha/debug/list', async (_req, res) => {
+  try {
+    const payload = { tasks: [['upload/list', SPACE_DID, {}]] };
+    const r = await axios.post(STORACHA_BRIDGE_URL, payload, { headers: bridgeHeaders() });
+    return res.json({ ok: true, bridge: r.data });
+  } catch (e) {
+    return res.status(500).json({ ok: false, error: e?.response?.data || e.message });
+  }
 });
