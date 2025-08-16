@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@storacha/client": "^1.7.6",
+    "canvas": "^2.11.2",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "ethers": "^6.15.0",
